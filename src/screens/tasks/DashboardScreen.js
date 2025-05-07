@@ -7,8 +7,8 @@ import GradientBackground, { gradientPresets } from '../../components/layout/Gra
 import Button from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
 import ProfileHeader from '../../components/layout/ProfileHeader';
-import TaskItem from '../../screens/tasks/TaskItem';
-import { colors, spacing, typography, commonStyles } from '../../theme';
+import TaskItem from './TaskItem';
+import { colors, spacing, typography, borderRadius, commonStyles } from '../../theme';
 
 const DashboardScreen = ({ navigation }) => {
   const dispatch = useDispatch();

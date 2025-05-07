@@ -4,7 +4,7 @@ export const colors = {
     accent: '#8AF3FF',
     
     background: {
-      light: '#caf8ca',
+      light: ['#caf8ca', '#a8f8a8'],
       dark: '#00eaea',
       dashboard: ['#9bf0e1', '#f8e861'],
       login: ['#B986F8', '#E0F63C'],

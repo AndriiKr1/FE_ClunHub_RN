@@ -24,7 +24,7 @@ const TaskCard = ({ task }) => {
   const [isTruncated, setIsTruncated] = useState(true);
   
   // Calculate if description should be truncated
-  const shouldTruncate = task.description && task.description.length > 100;
+  const shouldTruncate = task.description && task.description.length > 80;
   
   // Toggle truncation on press
   const toggleTruncation = () => {
@@ -39,20 +39,22 @@ const TaskCard = ({ task }) => {
       onPress={toggleTruncation}
       activeOpacity={shouldTruncate ? 0.7 : 1}
     >
-      <Text style={styles.taskStatusIndicator}>✓ </Text>
-      <Text style={styles.taskTitle}>{task.title || task.name || 'Untitled Task'}</Text>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+       
+        <Text style={styles.taskTitle}>{task.title || task.name || 'Untitled Task'}</Text>
+      </View>
       
       {task.description && (
         <View style={styles.taskDescriptionContainer}>
           <Text style={styles.taskDescription}>
             {shouldTruncate && isTruncated 
-              ? `${task.description.substring(0, 100)}...` 
+              ? `${task.description.substring(0, 80)}...` 
               : task.description}
           </Text>
             
           {shouldTruncate && (
-            <Text style={styles.showMoreText}>
-              {isTruncated ? 'Tap to show more' : 'Tap to show less'}
+            <Text style={[styles.showMoreText, {fontSize: typography.fontSizes.xs}]}>
+              {isTruncated ? 'Розгорнути' : 'Згорнути'}
             </Text>
           )}
         </View>
@@ -66,6 +68,7 @@ const CompletedTasksScreen = ({ navigation, route }) => {
   const { tasks, loading, error } = useSelector((state) => state.tasks);
   const [selectedDate, setSelectedDate] = useState('');
   const [displayTasks, setDisplayTasks] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const fetchTasksForDate = useCallback(
     async (date) => {
@@ -201,6 +204,8 @@ const CompletedTasksScreen = ({ navigation, route }) => {
                 )}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.taskList}
+                ItemSeparatorComponent={() => <View style={{ height: spacing.xs }} />}
+                showsVerticalScrollIndicator={false}
               />
             </>
           )}
@@ -264,14 +269,14 @@ const styles = StyleSheet.create({
   },
   subsectionTitle: {
     color: colors.text.primary,
-    fontSize: typography.fontSizes.lg,
-    marginTop: spacing.md,
+    fontSize: typography.fontSizes.md,
+    marginTop: spacing.xs,
     marginBottom: spacing.xs,
     textAlign: 'center',
   },
   taskList: {
-    gap: spacing.md,
-    paddingVertical: spacing.sm,
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
@@ -279,32 +284,41 @@ const styles = StyleSheet.create({
   taskCard: {
     backgroundColor: colors.card.task,
     borderRadius: borderRadius.round,
-    padding: spacing.md,
+    padding: spacing.sm,
+    paddingVertical: spacing.xs,
     width: '100%',
-    ...commonStyles.shadow.medium,
-  },
-  taskStatusIndicator: {
-    color: '#006644',
-    fontSize: typography.fontSizes.xl,
-    fontWeight: typography.fontWeights.bold,
+    marginBottom: spacing.xs,
+    ...commonStyles.shadow.light, // зменшив тінь для лаконічності
   },
   taskTitle: {
-    color: colors.text.dark,
-    fontSize: typography.fontSizes.xl,
-    fontWeight: typography.fontWeights.bold,
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: spacing.xs,
   },
+  taskNumber: {
+    color: '#006644',
+    fontSize: typography.fontSizes.md,
+    fontWeight: typography.fontWeights.bold,
+  },
+  taskName: {
+    color: colors.text.dark,
+    fontSize: typography.fontSizes.md,
+    fontWeight: typography.fontWeights.bold,
+  },
   taskDescriptionContainer: {
-    marginTop: spacing.xs,
+    marginLeft: spacing.md, // відступ зліва для вирівнювання з назвою
+    marginTop: 0,
   },
   taskDescription: {
-    fontSize: typography.fontSizes.md,
+    fontSize: typography.fontSizes.sm,
     color: colors.text.dark,
+    opacity: 0.8, // трохи затемнюємо опис для контрасту з назвою
   },
   showMoreText: {
-    fontSize: typography.fontSizes.sm,
-    marginTop: spacing.xs,
-    color: '#008080',
+    fontSize: typography.fontSizes.xs,
+    marginTop: spacing.xs / 2,
+    color: '#006644', // колір як у іконки виконаного завдання
+    fontWeight: typography.fontWeights.medium,
   },
   backSection: {
     alignItems: 'center',

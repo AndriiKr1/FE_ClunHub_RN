@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createTask, updateTask } from '../../store/slices/taskSlice';
 import GradientBackground, { gradientPresets } from '../../components/layout/GradientBackground';
 import Modal from '../../components/common/Modal';
-import CustomDatePicker from '../../screens/tasks/CustomDatePicker';
+import CustomDatePicker from './CustomDatePicker';
 import ProfileHeader from '../../components/layout/ProfileHeader';
 import { colors, spacing, typography, borderRadius, commonStyles } from '../../theme';
 import { useForm } from '../../hooks/useForm';

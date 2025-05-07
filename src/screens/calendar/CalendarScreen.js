@@ -16,8 +16,8 @@ import { formatDateForApi } from '../../utils/dataMappers';
 import { formatDateKey } from '../../utils/dateHelpers';
 import GradientBackground, { gradientPresets } from '../../components/layout/GradientBackground';
 import ProfileHeader from '../../components/layout/ProfileHeader';
-import MonthYearPicker from '../../screens/calendar/MonthYearPicker';
-import TaskBubble from '../../screens/calendar/TaskBubble';
+import MonthYearPicker from './MonthYearPicker';
+import TaskBubble from './TaskBubble';
 import Modal from '../../components/common/Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, spacing, typography, borderRadius, commonStyles } from '../../theme';
@@ -193,7 +193,7 @@ const CalendarScreen = ({ navigation, route }) => {
             {day}
           </Text>
           
-          {hasCompletedTasks && (
+          {/* {hasCompletedTasks && (
             <View style={styles.taskBubblesContainer}>
               {completedTasks.slice(0, 3).map((task, index) => (
                 <TaskBubble 
@@ -206,7 +206,7 @@ const CalendarScreen = ({ navigation, route }) => {
                 <Text style={styles.moreTasks}>+{completedTasks.length - 3}</Text>
               )}
             </View>
-          )}
+          )} */}
           
           {hasCompletedTasks && (
             <View style={styles.taskCount}>
