@@ -7,7 +7,7 @@ import GradientBackground, { gradientPresets } from '../../components/layout/Gra
 import Button from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
 import ProfileHeader from '../../components/layout/ProfileHeader';
-import TaskItem from '../../screen/tasks/TaskItem';
+import TaskItem from '../../screens/tasks/TaskItem';
 import { colors, spacing, typography, commonStyles } from '../../theme';
 
 const DashboardScreen = ({ navigation }) => {

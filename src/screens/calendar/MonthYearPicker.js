@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
-import Modal from '../common/Modal';
+import Modal from '../../components/common/Modal';
 import { colors, spacing, typography, borderRadius } from '../../theme';
 
 // Constants
