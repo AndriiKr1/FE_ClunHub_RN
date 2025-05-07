@@ -41,7 +41,7 @@ const ProfileHeader = () => {
 
   const confirmLogout = () => {
     dispatch(logout());
-    navigation.navigate('Welcome');
+    // navigation.navigate('Welcome');
     setShowLogoutConfirm(false);
   };
 
