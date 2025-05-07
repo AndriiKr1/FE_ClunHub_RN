@@ -193,21 +193,7 @@ const CalendarScreen = ({ navigation, route }) => {
             {day}
           </Text>
           
-          {/* {hasCompletedTasks && (
-            <View style={styles.taskBubblesContainer}>
-              {completedTasks.slice(0, 3).map((task, index) => (
-                <TaskBubble 
-                  key={index} 
-                  isCompleted={true} 
-                />
-              ))}
-              
-              {completedTasks.length > 3 && (
-                <Text style={styles.moreTasks}>+{completedTasks.length - 3}</Text>
-              )}
-            </View>
-          )} */}
-          
+               
           {hasCompletedTasks && (
             <View style={styles.taskCount}>
               <Text style={styles.completedCount}>

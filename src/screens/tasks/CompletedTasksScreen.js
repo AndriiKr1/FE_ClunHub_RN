@@ -15,6 +15,7 @@ import { formatDateForApi } from '../../utils/dataMappers';
 import ProfileHeader from '../../components/layout/ProfileHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, spacing, typography, borderRadius, commonStyles } from '../../theme';
+import GradientBackground, { gradientPresets } from '../../components/layout/GradientBackground';
 
 // Import images
 import leftArrow from '../../assets/images/left.png';
@@ -39,10 +40,9 @@ const TaskCard = ({ task }) => {
       onPress={toggleTruncation}
       activeOpacity={shouldTruncate ? 0.7 : 1}
     >
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-       
-        <Text style={styles.taskTitle}>{task.title || task.name || 'Untitled Task'}</Text>
-      </View>
+      <Text style={styles.taskTitle}>
+        {task.title || task.name || 'Untitled Task'}
+      </Text>
       
       {task.description && (
         <View style={styles.taskDescriptionContainer}>
@@ -53,8 +53,8 @@ const TaskCard = ({ task }) => {
           </Text>
             
           {shouldTruncate && (
-            <Text style={[styles.showMoreText, {fontSize: typography.fontSizes.xs}]}>
-              {isTruncated ? 'Розгорнути' : 'Згорнути'}
+            <Text style={styles.showMoreText}>
+              {isTruncated ? 'Show more' : 'Show less'}
             </Text>
           )}
         </View>
@@ -171,6 +171,8 @@ const CompletedTasksScreen = ({ navigation, route }) => {
   );
 
   return (
+    <GradientBackground colors={gradientPresets.completedTasks}>
+  
     <View style={styles.completedPage}>
       <View style={styles.headerContainer}>
         <ProfileHeader />
@@ -222,6 +224,8 @@ const CompletedTasksScreen = ({ navigation, route }) => {
         <Text style={styles.footerTitle}>family planner</Text>
       </View>
     </View>
+    
+    </GradientBackground>
   );
 };
 
@@ -229,7 +233,7 @@ const styles = StyleSheet.create({
   completedPage: {
     flex: 1,
     padding: spacing.lg,
-    backgroundColor: colors.background.completedTasks[0],
+    
   },
   headerContainer: {
     width: '100%',
@@ -284,40 +288,29 @@ const styles = StyleSheet.create({
   taskCard: {
     backgroundColor: colors.card.task,
     borderRadius: borderRadius.round,
-    padding: spacing.sm,
-    paddingVertical: spacing.xs,
+    padding: spacing.md,
     width: '100%',
     marginBottom: spacing.xs,
-    ...commonStyles.shadow.light, // зменшив тінь для лаконічності
+    ...commonStyles.shadow.light,
   },
   taskTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  taskNumber: {
-    color: '#006644',
-    fontSize: typography.fontSizes.md,
-    fontWeight: typography.fontWeights.bold,
-  },
-  taskName: {
     color: colors.text.dark,
     fontSize: typography.fontSizes.md,
     fontWeight: typography.fontWeights.bold,
+    marginBottom: spacing.xs,
   },
   taskDescriptionContainer: {
-    marginLeft: spacing.md, // відступ зліва для вирівнювання з назвою
-    marginTop: 0,
+    marginTop: spacing.xs,
   },
   taskDescription: {
     fontSize: typography.fontSizes.sm,
     color: colors.text.dark,
-    opacity: 0.8, // трохи затемнюємо опис для контрасту з назвою
+    opacity: 0.8,
   },
   showMoreText: {
     fontSize: typography.fontSizes.xs,
-    marginTop: spacing.xs / 2,
-    color: '#006644', // колір як у іконки виконаного завдання
+    marginTop: spacing.xs,
+    color: colors.text.primary,
     fontWeight: typography.fontWeights.medium,
   },
   backSection: {
