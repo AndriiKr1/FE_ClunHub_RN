@@ -271,6 +271,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: spacing.lg,
+    paddingTop: 70, 
   },
   contentWrapper: {
     width: '100%',
@@ -354,12 +355,12 @@ const styles = StyleSheet.create({
     height: 80,
     position: 'absolute',
     left: 0,
-    top: -5,
+    top: 90,
   },
   submitButton: {
     position: 'absolute',
     left: '50%',
-    top: -15,
+    top: 20,
   },
   checkmarkIcon: {
     width: 100,

@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   calendarPage: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingTop: 70, // Змініть це значення (було spacing.lg)
     paddingBottom: spacing.xl,
     alignItems: 'center',
     minHeight: '100%',

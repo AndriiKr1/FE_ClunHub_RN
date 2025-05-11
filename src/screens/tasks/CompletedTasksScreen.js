@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   completedPage: {
     flex: 1,
     padding: spacing.lg,
-    
+    paddingTop: 70, 
   },
   headerContainer: {
     width: '100%',
