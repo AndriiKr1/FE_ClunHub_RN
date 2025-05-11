@@ -11,8 +11,11 @@ export const registerUser = createAsyncThunk(
       return response;
     } catch (error) {
       if (error.response) {
-        if (error.response.status === 409 || 
-            (error.response.data?.message && error.response.data.message.includes("already exists"))) {
+        if (
+          error.response.status === 409 ||
+          (error.response.data?.message &&
+            error.response.data.message.includes("already exists"))
+        ) {
           return rejectWithValue("User with this email already exists");
         } else if (error.response.status === 400) {
           if (error.response.data?.errors) {
@@ -21,9 +24,13 @@ export const registerUser = createAsyncThunk(
               .join(", ");
             return rejectWithValue(`Validation failed: ${errorMessages}`);
           }
-          return rejectWithValue(error.response.data?.message || "Invalid registration data");
+          return rejectWithValue(
+            error.response.data?.message || "Invalid registration data"
+          );
         }
-        return rejectWithValue(error.response.data?.message || "Server error occurred");
+        return rejectWithValue(
+          error.response.data?.message || "Server error occurred"
+        );
       }
       return rejectWithValue("Connection error. Please try again later.");
     }
@@ -35,23 +42,28 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
-      
+
       if (!response.token || !response.user) {
         return rejectWithValue("invalid_response_format");
       }
-      
+
       return response;
     } catch (error) {
       if (error.response) {
         if (error.response.status === 400) {
-          if (typeof error.response.data === "string" && 
-              error.response.data.includes("Invalid email or password")) {
+          if (
+            typeof error.response.data === "string" &&
+            error.response.data.includes("Invalid email or password")
+          ) {
             return rejectWithValue("invalid_credentials");
           }
           return rejectWithValue(error.response.data || "bad_request");
         } else if (error.response.status === 404) {
           return rejectWithValue("user_not_found");
-        } else if (error.response.status === 401 || error.response.status === 403) {
+        } else if (
+          error.response.status === 401 ||
+          error.response.status === 403
+        ) {
           return rejectWithValue("invalid_credentials");
         }
         return rejectWithValue(error.response.data || "server_error");
@@ -70,7 +82,9 @@ export const requestPasswordReset = createAsyncThunk(
       const response = await authService.requestPasswordReset(email);
       return response;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to request password reset");
+      return rejectWithValue(
+        error.response?.data || "Failed to request password reset"
+      );
     }
   }
 );
@@ -99,7 +113,21 @@ export const resetPassword = createAsyncThunk(
       const response = await authService.resetPassword(passwordData);
       return response;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to reset password");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to reset password"
+      );
+    }
+  }
+);
+
+export const joinFamily = createAsyncThunk(
+  "auth/joinFamily",
+  async (inviteCode, { rejectWithValue }) => {
+    try {
+      const response = await authService.joinFamily(inviteCode);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to join family");
     }
   }
 );
@@ -109,7 +137,7 @@ const loadUserFromStorage = async () => {
   try {
     const storedUser = await AsyncStorage.getItem("user");
     const storedToken = await AsyncStorage.getItem("token");
-    
+
     return {
       user: storedUser ? JSON.parse(storedUser) : null,
       token: storedToken || null,
@@ -174,7 +202,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        
+
         // Store user data in AsyncStorage
         AsyncStorage.setItem("token", action.payload.token);
         AsyncStorage.setItem("user", JSON.stringify(action.payload.user));
@@ -183,7 +211,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      
+
       // Login user
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
@@ -193,7 +221,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        
+
         // Store user data in AsyncStorage
         AsyncStorage.setItem("token", action.payload.token);
         AsyncStorage.setItem("user", JSON.stringify(action.payload.user));
@@ -202,7 +230,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      
+
       // Request password reset
       .addCase(requestPasswordReset.pending, (state) => {
         state.passwordReset.isLoading = true;
@@ -217,7 +245,7 @@ const authSlice = createSlice({
         state.passwordReset.isLoading = false;
         state.passwordReset.error = action.payload;
       })
-      
+
       // Verify reset code
       .addCase(verifyResetCode.pending, (state) => {
         state.passwordReset.isLoading = true;
@@ -231,7 +259,7 @@ const authSlice = createSlice({
         state.passwordReset.isLoading = false;
         state.passwordReset.error = action.payload;
       })
-      
+
       // Reset password
       .addCase(resetPassword.pending, (state) => {
         state.passwordReset.isLoading = true;
@@ -244,11 +272,16 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.passwordReset.isLoading = false;
         state.passwordReset.error = action.payload;
+      })
+
+      .addCase(joinFamily.fulfilled, (state, action) => {
+        state.user = { ...state.user, ...action.payload.user };
       });
   },
 });
 
-export const { logout, clearError, clearPasswordResetState, setUser } = authSlice.actions;
+export const { logout, clearError, clearPasswordResetState, setUser } =
+  authSlice.actions;
 
 // Initialize auth state from AsyncStorage
 export const initializeAuthState = () => async (dispatch) => {

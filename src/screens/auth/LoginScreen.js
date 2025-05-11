@@ -1,11 +1,11 @@
-import React from 'react';
+
 import { View, Text, StyleSheet, Image, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../store/slices/authSlice';
 import GradientBackground, { gradientPresets } from '../../components/layout/GradientBackground';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
-import { colors, spacing, typography, commonStyles } from '../../theme';
+import { colors, spacing, typography } from '../../theme';
 import { useForm } from '../../hooks/useForm';
 
 const LoginScreen = ({ navigation }) => {
@@ -168,6 +168,7 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     padding: spacing.lg,
     alignItems: 'center',
+    paddingTop: 70
   },
   logoContainer: {
     width: '100%',
@@ -175,15 +176,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   logo: {
-    width: 180,
-    height: 100,
+    width: 150,
+    height: 150,
   },
   form: {
     width: '100%',
     marginVertical: spacing.lg,
   },
   forgotPasswordContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'flex',
     marginBottom: spacing.lg,
   },
   forgotPassword: {

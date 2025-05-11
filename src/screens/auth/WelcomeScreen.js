@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
+
+import { View, Text, StyleSheet, Image, SafeAreaView } from 'react-native';
 import GradientBackground, { gradientPresets } from '../../components/layout/GradientBackground';
 import Button from '../../components/common/Button';
 import { colors, spacing, typography } from '../../theme';
@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: spacing.xl,
+    paddingTop: 180
   },
   logoContainer: {
     alignItems: 'center',

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal as RNModal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, typography, borderRadius, spacing, commonStyles } from '../../theme';
 import Button from './Button';

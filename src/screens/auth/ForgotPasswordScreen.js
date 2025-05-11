@@ -16,7 +16,8 @@ import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { colors, spacing, typography, borderRadius, commonStyles } from '../../theme';
 import { useForm } from '../../hooks/useForm';
-import TouchableOpacity from 'react-native/Libraries/Components/Touchable/TouchableOpacity';
+import { TouchableOpacity } from 'react-native';
+
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -434,7 +435,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 150,
-    height: 80,
+    height: 150,
   },
   title: {
     fontSize: typography.fontSizes.xl,

@@ -1,10 +1,9 @@
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator } from "@react-navigation/stack";
 
-import DashboardScreen from '../screens/tasks/DashboardScreen';
-import AddTaskScreen from '../screens/tasks/AddTaskScreen';
-import CalendarScreen from '../screens/calendar/CalendarScreen';
-import CompletedTasksScreen from '../screens/tasks/CompletedTasksScreen';
+import DashboardScreen from "../screens/tasks/DashboardScreen";
+import AddTaskScreen from "../screens/tasks/AddTaskScreen";
+import CalendarScreen from "../screens/calendar/CalendarScreen";
+import CompletedTasksScreen from "../screens/tasks/CompletedTasksScreen";
 
 const Stack = createStackNavigator();
 

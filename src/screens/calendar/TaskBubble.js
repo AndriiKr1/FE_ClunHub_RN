@@ -1,13 +1,11 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { colors } from '../../theme';
+import { View, StyleSheet } from "react-native";
+import { colors } from "../../theme";
 
 const TaskBubble = ({ isCompleted }) => {
   return (
-    <View style={[
-      styles.taskBubble,
-      isCompleted && styles.completedTaskBubble
-    ]} />
+    <View
+      style={[styles.taskBubble, isCompleted && styles.completedTaskBubble]}
+    />
   );
 };
 
@@ -16,7 +14,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#b5e9ff',
+    backgroundColor: "#b5e9ff",
     margin: 2,
   },
   completedTaskBubble: {
