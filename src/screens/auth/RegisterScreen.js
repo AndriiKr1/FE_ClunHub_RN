@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   },
   content: {
     width: '100%',
-    maxWidth: 380,
+    maxWidth: 400,
     padding: spacing.lg,
     alignItems: 'center',
   },
@@ -316,8 +316,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   logo: {
-    width: 120,
-    height: 80,
+    width: 150,
+    height: 150,
   },
   form: {
     width: '100%',

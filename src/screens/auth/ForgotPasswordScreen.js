@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 150,
-    height: 80,
+    height: 150,
   },
   title: {
     fontSize: typography.fontSizes.xl,

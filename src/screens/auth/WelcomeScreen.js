@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: spacing.xl,
+    paddingTop: 180
   },
   logoContainer: {
     alignItems: 'center',

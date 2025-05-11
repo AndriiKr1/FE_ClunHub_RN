@@ -168,6 +168,7 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     padding: spacing.lg,
     alignItems: 'center',
+    paddingTop: 70
   },
   logoContainer: {
     width: '100%',
@@ -175,15 +176,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   logo: {
-    width: 180,
-    height: 100,
+    width: 150,
+    height: 150,
   },
   form: {
     width: '100%',
     marginVertical: spacing.lg,
   },
   forgotPasswordContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'flex',
     marginBottom: spacing.lg,
   },
   forgotPassword: {
