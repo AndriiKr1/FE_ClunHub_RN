@@ -388,7 +388,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
               </View>
               
               {/* Back to login link */}
-              <View style={styles.backToLoginContainer}>
+            {/*   <View style={styles.backToLoginContainer}>
                 <TouchableOpacity 
                   onPress={() => navigation.navigate('Login')}
                 >
@@ -396,7 +396,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                     Back to login
                   </Text>
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </View>
             
             <View style={styles.footerTextContainer}>
