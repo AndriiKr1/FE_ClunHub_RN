@@ -47,10 +47,12 @@ const avatarOptions = [
   { id: "avatar6", image: avatar6 },
 ];
 
+import FamilyIcon from '../../assets/images/Family.png';
+import UserIcon from '../../assets/images/User.png';
 // Role options - simplified
 const roleOptions = [
-  { id: "admin", name: "Create Family (Admin)", icon: "👨‍👩‍👧‍👦" },
-  { id: "user", name: "Join Family (User)", icon: "👤" },
+  { id: "admin", name: "Create Family (Admin)", icon: FamilyIcon },
+  { id: "user", name: "Join Family (User)", icon: UserIcon },
 ];
 
 const RegisterScreen = ({ navigation }) => {
@@ -307,10 +309,17 @@ const RegisterScreen = ({ navigation }) => {
                 >
                   {values.role ? (
                     <View style={styles.roleSelectorContent}>
-                      <Text style={styles.roleSelectorText}>
-                        {roleOptions.find((r) => r.id === values.role)?.icon}{" "}
-                        {roleOptions.find((r) => r.id === values.role)?.name}
-                      </Text>
+                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+  <Image
+    source={roleOptions.find((r) => r.id === values.role)?.icon}
+    style={styles.roleIconImage}
+    resizeMode="contain"
+  />
+  <Text style={styles.roleSelectorText}>
+    {roleOptions.find((r) => r.id === values.role)?.name}
+  </Text>
+</View>
+
                       <Text style={styles.dropdownArrow}>▼</Text>
                     </View>
                   ) : (
@@ -426,7 +435,7 @@ const RegisterScreen = ({ navigation }) => {
                     ]}
                     onPress={() => handleRoleSelect(role.id)}
                   >
-                    <Text style={styles.roleIcon}>{role.icon}</Text>
+                    <Image source={role.icon} style={styles.roleIconImage} resizeMode="contain" />
                     <Text
                       style={[
                         styles.roleName,
@@ -794,6 +803,11 @@ const styles = StyleSheet.create({
   continueButton: {
     width: "100%",
   },
+  roleIconImage: {
+  width: 24,
+  height: 24,
+  marginRight: spacing.md,
+},
 });
 
 export default RegisterScreen;
