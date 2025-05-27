@@ -62,7 +62,6 @@ const RegisterScreen = ({ navigation }) => {
   // Modal states
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
-  const [showFamilyNameModal, setShowFamilyNameModal] = useState(false);
   const [showInviteCodeModal, setShowInviteCodeModal] = useState(false);
   const [showGeneratedCodeModal, setShowGeneratedCodeModal] = useState(false);
   
@@ -142,7 +141,6 @@ const RegisterScreen = ({ navigation }) => {
     setShowFamilyRoles(false);
 
     if (roleId === "admin") {
-      // Показуємо модальне вікно створення сім'ї
       setShowGeneratedCodeModal(true);
     } else if (roleId === "user") {
       setShowInviteCodeModal(true);
@@ -164,7 +162,6 @@ const RegisterScreen = ({ navigation }) => {
       return;
     }
     
-    // Генеруємо новий код
     const code = generateInviteCode();
     setGeneratedInviteCode(code);
   };
@@ -408,28 +405,36 @@ const RegisterScreen = ({ navigation }) => {
                   <Text style={styles.adminButtonText}>Create Family (Admin)</Text>
                 </TouchableOpacity>
                 
-                <TouchableOpacity 
-                  style={styles.userButton}
-                  onPress={() => setShowFamilyRoles(!showFamilyRoles)}
-                >
-                  <Image source={UserIcon} style={styles.roleButtonIcon} />
-                  <Text style={styles.userButtonText}>Join Family (User)</Text>
-                  <Text style={styles.userDropdownArrow}>▼</Text>
+                <View style={styles.userButtonContainer}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.userButton,
+                      showFamilyRoles && styles.userButtonExpanded
+                    ]}
+                    onPress={() => setShowFamilyRoles(!showFamilyRoles)}
+                  >
+                    <Image source={UserIcon} style={styles.roleButtonIcon} />
+                    <Text style={styles.userButtonText}>Join Family (User)</Text>
+                    <Text style={[
+                      styles.userDropdownArrow,
+                      showFamilyRoles && styles.userDropdownArrowRotated
+                    ]}>▼</Text>
+                  </TouchableOpacity>
                   
                   {showFamilyRoles && (
-                    <View style={styles.userDropdownMenu}>
+                    <View style={styles.userRolesList}>
                       {['Father', 'Mother', 'Daughter', 'Son', 'Grandma', 'Grandpa'].map((role, index) => (
                         <TouchableOpacity 
                           key={index} 
                           onPress={() => handleRoleSelect('user')}
-                          style={styles.userDropdownItem}
+                          style={styles.userRoleItem}
                         >
-                          <Text style={styles.userDropdownText}>{role}</Text>
+                          <Text style={styles.userRoleText}>{role}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
                   )}
-                </TouchableOpacity>
+                </View>
               </View>
               
               <TouchableOpacity 
@@ -438,13 +443,12 @@ const RegisterScreen = ({ navigation }) => {
               >
                 <Text style={styles.roleModalCancelText}>Cancel</Text>
               </TouchableOpacity>
-              
-              <Text style={styles.roleModalFooter}>family planner</Text>
+      
             </View>
           </View>
         </RNModal>
 
-        {/* Create Family Modal - все в одному вікні */}
+        {/* Create Family Modal */}
         <RNModal
           visible={showGeneratedCodeModal}
           transparent={true}
@@ -574,7 +578,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     justifyContent: "center",
     paddingHorizontal: spacing.md,
-    ...commonStyles.shadow.light,
+    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
     marginBottom: spacing.md,
   },
   avatarSelectorContent: {
@@ -610,7 +614,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     justifyContent: "center",
     paddingHorizontal: spacing.md,
-    ...commonStyles.shadow.light,
+    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
     marginBottom: spacing.md,
   },
   roleSelectorContent: {
@@ -705,7 +709,7 @@ const styles = StyleSheet.create({
   },
   selectedAvatarContainer: {
     borderColor: colors.text.primary,
-    ...commonStyles.shadow.medium,
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)",
   },
   avatarImage: {
     width: "100%",
@@ -738,7 +742,7 @@ const styles = StyleSheet.create({
   modalButton: {
     flex: 1,
   },
-  // Стилі для модальних вікон
+  // Role Modal Styles
   roleModalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -753,10 +757,7 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 400,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
+    boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.3)",
     elevation: 10,
   },
   roleModalTitle: {
@@ -778,11 +779,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
+    boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)",
     elevation: 3,
+  },
+  userButtonContainer: {
+    width: '100%',
   },
   userButton: {
     backgroundColor: 'white',
@@ -791,12 +792,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
     elevation: 2,
+  },
+  userButtonExpanded: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    marginBottom: 0,
   },
   roleButtonIcon: {
     width: 20,
@@ -818,48 +820,47 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#01578F',
     marginLeft: 10,
+    transform: [{ rotate: '0deg' }],
   },
-  userDropdownMenu: {
-    position: 'absolute',
-    top: 55,
-    right: 15,
-    backgroundColor: '#B986F8',
-    borderRadius: 12,
-    padding: 8,
-    minWidth: 90,
-    zIndex: 1000,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
+  userDropdownArrowRotated: {
+    transform: [{ rotate: '180deg' }],
   },
-  userDropdownItem: {
-    paddingVertical: 4,
+  userRolesList: {
+    backgroundColor: 'white',
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+    elevation: 2,
+    marginTop: -2,
   },
-  userDropdownText: {
-    color: 'white',
-    fontSize: 13,
+  userRoleItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 15,
+    marginVertical: 2,
+    backgroundColor: '#F8F9FA',
+  },
+  userRoleText: {
+    color: '#01578F',
+    fontSize: 14,
     textAlign: 'center',
+    fontWeight: '500',
   },
   roleModalCancelButton: {
     backgroundColor: '#FF6B9D',
     borderRadius: 20,
     paddingVertical: 12,
     paddingHorizontal: 25,
-    marginBottom: 20,
   },
   roleModalCancelText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
   },
-  roleModalFooter: {
-    fontSize: 14,
-    color: '#645270',
-  },
   
-  // Стилі для модалу коду
+  // Code Modal Styles
   codeModalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -874,10 +875,7 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 400,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
+    boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.3)",
     elevation: 10,
   },
   codeModalTitle: {
@@ -957,11 +955,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  codeModalOkLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 8,
-  },
   codeModalOkButton: {
     backgroundColor: '#D4FC79',
     borderRadius: 15,
@@ -973,10 +966,6 @@ const styles = StyleSheet.create({
     color: '#01578F',
     fontSize: 14,
     fontWeight: '600',
-  },
-  codeModalFooter: {
-    fontSize: 14,
-    color: '#645270',
   },
 });
 
