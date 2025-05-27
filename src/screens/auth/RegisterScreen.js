@@ -10,6 +10,8 @@ import {
   Platform,
   StyleSheet,
   Alert,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../store/slices/authSlice";
@@ -27,8 +29,6 @@ import {
   commonStyles,
 } from "../../theme";
 import { useForm } from "../../hooks/useForm";
-import { TouchableOpacity } from 'react-native';
-
 
 // Import avatars
 import avatar1 from "../../assets/avatars/avatar1.png";
@@ -49,7 +49,7 @@ const avatarOptions = [
 
 import FamilyIcon from '../../assets/images/Family.png';
 import UserIcon from '../../assets/images/User.png';
-// Role options - simplified
+
 const roleOptions = [
   { id: "admin", name: "Create Family (Admin)", icon: FamilyIcon },
   { id: "user", name: "Join Family (User)", icon: UserIcon },
@@ -58,14 +58,19 @@ const roleOptions = [
 const RegisterScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { isLoading } = useSelector((state) => state.auth);
+  
+  // Modal states
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [showFamilyNameModal, setShowFamilyNameModal] = useState(false);
   const [showInviteCodeModal, setShowInviteCodeModal] = useState(false);
   const [showGeneratedCodeModal, setShowGeneratedCodeModal] = useState(false);
+  
+  // Form states
   const [familyName, setFamilyName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [generatedInviteCode, setGeneratedInviteCode] = useState("");
+  const [showFamilyRoles, setShowFamilyRoles] = useState(false);
 
   // Validation function
   const validateRegistration = (values) => {
@@ -104,18 +109,6 @@ const RegisterScreen = ({ navigation }) => {
       errors.password = "Password must be at least 8 characters";
     } else if (values.password.length > 25) {
       errors.password = "Password must not exceed 25 characters";
-    } else if (
-      !/^[A-Za-z0-9!@#$%^&*()_+[\]{};':"\\|,.<>/?-]+$/.test(values.password)
-    ) {
-      errors.password = "Only Latin letters, numbers and symbols are allowed";
-    } else if (
-      !/[a-z]/.test(values.password) ||
-      !/[A-Z]/.test(values.password) ||
-      !/[0-9]/.test(values.password) ||
-      !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(values.password)
-    ) {
-      errors.password =
-        "Password must include uppercase, lowercase, number and special character";
     }
 
     if (!values.role) {
@@ -125,7 +118,6 @@ const RegisterScreen = ({ navigation }) => {
     return errors;
   };
 
-  // Use custom form hook
   const {
     values,
     errors,
@@ -147,17 +139,17 @@ const RegisterScreen = ({ navigation }) => {
   const handleRoleSelect = (roleId) => {
     setFieldValue("role", roleId);
     setShowRoleModal(false);
+    setShowFamilyRoles(false);
 
-    // Show appropriate modal based on role
     if (roleId === "admin") {
-      setShowFamilyNameModal(true);
+      // Показуємо модальне вікно створення сім'ї
+      setShowGeneratedCodeModal(true);
     } else if (roleId === "user") {
       setShowInviteCodeModal(true);
     }
   };
 
   const generateInviteCode = () => {
-    // Generate a random 6-character code
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let code = "";
     for (let i = 0; i < 6; i++) {
@@ -166,17 +158,15 @@ const RegisterScreen = ({ navigation }) => {
     return code;
   };
 
-  const handleFamilyNameSubmit = () => {
+  const handleCreateInviteCode = () => {
     if (!familyName.trim()) {
       Alert.alert("Error", "Please enter a family name");
       return;
     }
-
-    // Generate invite code
+    
+    // Генеруємо новий код
     const code = generateInviteCode();
     setGeneratedInviteCode(code);
-    setShowFamilyNameModal(false);
-    setShowGeneratedCodeModal(true);
   };
 
   const handleInviteCodeSubmit = () => {
@@ -185,7 +175,6 @@ const RegisterScreen = ({ navigation }) => {
       return;
     }
 
-    // Close modal and proceed with registration
     setShowInviteCodeModal(false);
   };
 
@@ -202,7 +191,6 @@ const RegisterScreen = ({ navigation }) => {
         role: values.role,
       };
 
-      // Add family-specific data based on role
       if (values.role === "admin") {
         registrationData.familyName = familyName;
         registrationData.inviteCode = generatedInviteCode;
@@ -211,21 +199,10 @@ const RegisterScreen = ({ navigation }) => {
       }
 
       await dispatch(registerUser(registrationData)).unwrap();
-
       navigation.navigate("Dashboard");
     } catch (error) {
       console.error("Registration error:", error);
-
-      if (typeof error === "string" && error.includes("already exists")) {
-        setSubmitError("User with this email already exists");
-      } else if (
-        typeof error === "string" &&
-        error.includes("Validation failed")
-      ) {
-        setSubmitError(error);
-      } else {
-        setSubmitError(error || "Registration failed. Please try again.");
-      }
+      setSubmitError(error || "Registration failed. Please try again.");
     }
   };
 
@@ -277,7 +254,7 @@ const RegisterScreen = ({ navigation }) => {
                 >
                   {values.avatar ? (
                     <View style={styles.avatarSelectorContent}>
-                      <Text style={styles.avatarSelectorText}>
+                      <Text style={styles.avatarSelectorTextSelected}>
                         Avatar selected
                       </Text>
                       <View style={styles.avatarPreviewContainer}>
@@ -300,7 +277,6 @@ const RegisterScreen = ({ navigation }) => {
                   <Text style={styles.error}>{errors.avatar}</Text>
                 )}
 
-                {/* Role Selector */}
                 <TouchableOpacity
                   testID="role-selector"
                   style={styles.roleSelector}
@@ -309,22 +285,21 @@ const RegisterScreen = ({ navigation }) => {
                 >
                   {values.role ? (
                     <View style={styles.roleSelectorContent}>
-                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-  <Image
-    source={roleOptions.find((r) => r.id === values.role)?.icon}
-    style={styles.roleIconImage}
-    resizeMode="contain"
-  />
-  <Text style={styles.roleSelectorText}>
-    {roleOptions.find((r) => r.id === values.role)?.name}
-  </Text>
-</View>
-
+                      <View style={styles.roleIconContainer}>
+                        <Image
+                          source={roleOptions.find((r) => r.id === values.role)?.icon}
+                          style={styles.roleIconImage}
+                          resizeMode="contain"
+                        />
+                        <Text style={styles.roleSelectorTextSelected}>
+                          {roleOptions.find((r) => r.id === values.role)?.name}
+                        </Text>
+                      </View>
                       <Text style={styles.dropdownArrow}>▼</Text>
                     </View>
                   ) : (
                     <View style={styles.roleSelectorContent}>
-                      <Text style={styles.roleSelectorPlaceholder}>
+                      <Text style={styles.roleSelectorText}>
                         Choose your role...
                       </Text>
                       <Text style={styles.dropdownArrow}>▼</Text>
@@ -354,9 +329,9 @@ const RegisterScreen = ({ navigation }) => {
                   error={errors.password}
                 />
 
-                {submitError ? (
+                {submitError && (
                   <Text style={styles.submitError}>{submitError}</Text>
-                ) : null}
+                )}
 
                 <Button
                   testID="register-submit-btn"
@@ -375,7 +350,7 @@ const RegisterScreen = ({ navigation }) => {
           </View>
         </ScrollView>
 
-        {/* Avatar modal */}
+        {/* Avatar Modal */}
         <RNModal
           visible={showAvatarModal}
           transparent={true}
@@ -392,8 +367,7 @@ const RegisterScreen = ({ navigation }) => {
                   <TouchableOpacity
                     style={[
                       styles.avatarImageContainer,
-                      values.avatar === item.id &&
-                        styles.selectedAvatarContainer,
+                      values.avatar === item.id && styles.selectedAvatarContainer,
                     ]}
                     onPress={() => handleAvatarSelect(item.id)}
                   >
@@ -414,7 +388,7 @@ const RegisterScreen = ({ navigation }) => {
           </View>
         </RNModal>
 
-        {/* Role modal */}
+        {/* Role Selection Modal */}
         <RNModal
           visible={showRoleModal}
           transparent={true}
@@ -422,97 +396,109 @@ const RegisterScreen = ({ navigation }) => {
           onRequestClose={() => setShowRoleModal(false)}
         >
           <View style={styles.roleModalOverlay}>
-            <View style={styles.roleModal}>
-              <Text style={styles.modalTitle}>Choose your role</Text>
-              <View style={styles.roleList}>
-                {roleOptions.map((role) => (
-                  <TouchableOpacity
-                    key={role.id}
-                    testID={`role-option-${role.id}`}
-                    style={[
-                      styles.roleOption,
-                      values.role === role.id && styles.selectedRoleOption,
-                    ]}
-                    onPress={() => handleRoleSelect(role.id)}
-                  >
-                    <Image source={role.icon} style={styles.roleIconImage} resizeMode="contain" />
-                    <Text
-                      style={[
-                        styles.roleName,
-                        values.role === role.id && styles.selectedRoleName,
-                      ]}
-                    >
-                      {role.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+            <View style={styles.roleModalContent}>
+              <Text style={styles.roleModalTitle}>Choose your role</Text>
+              
+              <View style={styles.roleModalButtons}>
+                <TouchableOpacity 
+                  style={styles.adminButton}
+                  onPress={() => handleRoleSelect('admin')}
+                >
+                  <Image source={FamilyIcon} style={styles.roleButtonIcon} />
+                  <Text style={styles.adminButtonText}>Create Family (Admin)</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={styles.userButton}
+                  onPress={() => setShowFamilyRoles(!showFamilyRoles)}
+                >
+                  <Image source={UserIcon} style={styles.roleButtonIcon} />
+                  <Text style={styles.userButtonText}>Join Family (User)</Text>
+                  <Text style={styles.userDropdownArrow}>▼</Text>
+                  
+                  {showFamilyRoles && (
+                    <View style={styles.userDropdownMenu}>
+                      {['Father', 'Mother', 'Daughter', 'Son', 'Grandma', 'Grandpa'].map((role, index) => (
+                        <TouchableOpacity 
+                          key={index} 
+                          onPress={() => handleRoleSelect('user')}
+                          style={styles.userDropdownItem}
+                        >
+                          <Text style={styles.userDropdownText}>{role}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </TouchableOpacity>
               </View>
-              <Button
-                testID="role-cancel-btn"
-                title="Cancel"
+              
+              <TouchableOpacity 
+                style={styles.roleModalCancelButton}
                 onPress={() => setShowRoleModal(false)}
-                variant="outline"
-                style={styles.cancelButton}
-              />
+              >
+                <Text style={styles.roleModalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <Text style={styles.roleModalFooter}>family planner</Text>
             </View>
           </View>
         </RNModal>
 
-        {/* Family Name Modal (for Admin) */}
-        <Modal
-          visible={showFamilyNameModal}
-          title="Create Family"
-          onClose={() => setShowFamilyNameModal(false)}
-        >
-          <View style={styles.modalContent}>
-            <Text style={styles.modalLabel}>Enter family name:</Text>
-            <Input
-              value={familyName}
-              onChangeText={setFamilyName}
-              placeholder="Family name"
-              style={styles.modalInput}
-            />
-            <View style={styles.modalButtons}>
-              <Button
-                title="Cancel"
-                onPress={() => setShowFamilyNameModal(false)}
-                variant="outline"
-                style={styles.modalButton}
-              />
-              <Button
-                title="OK"
-                onPress={handleFamilyNameSubmit}
-                variant="secondary"
-                style={styles.modalButton}
-              />
-            </View>
-          </View>
-        </Modal>
-
-        {/* Generated Invite Code Modal */}
-        <Modal
+        {/* Create Family Modal - все в одному вікні */}
+        <RNModal
           visible={showGeneratedCodeModal}
-          title="Family Created!"
-          onClose={() => setShowGeneratedCodeModal(false)}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowGeneratedCodeModal(false)}
         >
-          <View style={styles.modalContent}>
-            <Text style={styles.modalLabel}>Your family invite code:</Text>
-            <View style={styles.inviteCodeBox}>
-              <Text style={styles.inviteCodeText}>{generatedInviteCode}</Text>
+          <View style={styles.codeModalOverlay}>
+            <View style={styles.codeModalContent}>
+              <Text style={styles.codeModalTitle}>Create Family</Text>
+              
+              <Text style={styles.codeModalLabel}>family name</Text>
+              <TextInput
+                style={styles.codeModalInput}
+                placeholder="Create Family Name"
+                value={familyName}
+                onChangeText={setFamilyName}
+              />
+              
+              <TouchableOpacity 
+                style={styles.codeModalCreateButton}
+                onPress={handleCreateInviteCode}
+              >
+                <Text style={styles.codeModalCreateButtonText}>Create invite code</Text>
+              </TouchableOpacity>
+              
+              {generatedInviteCode ? (
+                <>
+                  <Text style={styles.codeModalInviteLabel}>invite code</Text>
+                  <View style={styles.codeModalInviteRow}>
+                    <View style={styles.codeModalInviteCodeContainer}>
+                      <Text style={styles.codeModalInviteDisplay}>{generatedInviteCode}</Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.codeModalCopyButton}
+                      onPress={() => Alert.alert('Copied!', `Code ${generatedInviteCode} copied to clipboard`)}
+                    >
+                      <Text style={styles.codeModalCopyText}>Copy</Text>
+                    </TouchableOpacity>
+                  </View>
+                  
+                  <TouchableOpacity 
+                    style={styles.codeModalOkButton}
+                    onPress={() => setShowGeneratedCodeModal(false)}
+                  >
+                    <Text style={styles.codeModalOkText}>OK</Text>
+                  </TouchableOpacity>
+                </>
+              ) : null}
+          
             </View>
-            <Text style={styles.modalHint}>
-              Share this code with family members to let them join
-            </Text>
-            <Button
-              title="Continue"
-              onPress={() => setShowGeneratedCodeModal(false)}
-              variant="secondary"
-              style={styles.continueButton}
-            />
           </View>
-        </Modal>
+        </RNModal>
 
-        {/* Enter Invite Code Modal (for User) */}
+        {/* Invite Code Modal */}
         <Modal
           visible={showInviteCodeModal}
           title="Join Family"
@@ -601,6 +587,10 @@ const styles = StyleSheet.create({
     color: "#aaa",
     fontStyle: "italic",
   },
+  avatarSelectorTextSelected: {
+    fontSize: typography.fontSizes.md,
+    color: colors.text.dark,
+  },
   avatarPreviewContainer: {
     width: 40,
     height: 40,
@@ -628,18 +618,27 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  roleSelectorText: {
-    fontSize: typography.fontSizes.md,
-    color: colors.text.dark,
+  roleIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  roleSelectorPlaceholder: {
+  roleSelectorText: {
     fontSize: typography.fontSizes.md,
     color: "#aaa",
     fontStyle: "italic",
   },
+  roleSelectorTextSelected: {
+    fontSize: typography.fontSizes.md,
+    color: colors.text.dark,
+  },
   dropdownArrow: {
     fontSize: typography.fontSizes.sm,
     color: colors.text.secondary,
+  },
+  roleIconImage: {
+    width: 24,
+    height: 24,
+    marginRight: spacing.sm,
   },
   error: {
     color: colors.status.error,
@@ -717,49 +716,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     marginTop: spacing.md,
   },
-  roleModalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  roleModal: {
-    backgroundColor: "white",
-    borderRadius: borderRadius.large,
-    padding: spacing.lg,
-    width: "80%",
-    maxWidth: 300,
-    alignItems: "center",
-  },
-  roleList: {
-    width: "100%",
-    marginVertical: spacing.sm,
-  },
-  roleOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.medium,
-    marginBottom: spacing.xs,
-    backgroundColor: "#f5f5f5",
-  },
-  selectedRoleOption: {
-    backgroundColor: colors.accent,
-    ...commonStyles.shadow.light,
-  },
-  roleIcon: {
-    fontSize: 24,
-    marginRight: spacing.md,
-  },
-  roleName: {
-    fontSize: typography.fontSizes.md,
-    color: colors.text.dark,
-  },
-  selectedRoleName: {
-    fontWeight: typography.fontWeights.bold,
-    color: colors.text.primary,
-  },
   modalContent: {
     width: "100%",
     alignItems: "center",
@@ -782,32 +738,246 @@ const styles = StyleSheet.create({
   modalButton: {
     flex: 1,
   },
-  inviteCodeBox: {
-    backgroundColor: "#f0f0f0",
-    padding: spacing.lg,
-    borderRadius: borderRadius.medium,
-    marginBottom: spacing.md,
+  // Стилі для модальних вікон
+  roleModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingHorizontal: 20,
   },
-  inviteCodeText: {
-    fontSize: typography.fontSizes.xxl,
-    fontWeight: typography.fontWeights.bold,
-    color: colors.text.primary,
-    letterSpacing: 4,
+  roleModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 30,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
   },
-  modalHint: {
-    fontSize: typography.fontSizes.sm,
-    color: colors.text.secondary,
-    textAlign: "center",
-    marginBottom: spacing.lg,
+  roleModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#01578F',
+    marginBottom: 25,
+    textAlign: 'center',
   },
-  continueButton: {
-    width: "100%",
+  roleModalButtons: {
+    width: '100%',
+    marginBottom: 25,
   },
-  roleIconImage: {
-  width: 24,
-  height: 24,
-  marginRight: spacing.md,
-},
+  adminButton: {
+    backgroundColor: '#B986F8',
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  userButton: {
+    backgroundColor: 'white',
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  roleButtonIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 12,
+  },
+  adminButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  userButtonText: {
+    color: '#01578F',
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+  },
+  userDropdownArrow: {
+    fontSize: 14,
+    color: '#01578F',
+    marginLeft: 10,
+  },
+  userDropdownMenu: {
+    position: 'absolute',
+    top: 55,
+    right: 15,
+    backgroundColor: '#B986F8',
+    borderRadius: 12,
+    padding: 8,
+    minWidth: 90,
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  userDropdownItem: {
+    paddingVertical: 4,
+  },
+  userDropdownText: {
+    color: 'white',
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  roleModalCancelButton: {
+    backgroundColor: '#FF6B9D',
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    marginBottom: 20,
+  },
+  roleModalCancelText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  roleModalFooter: {
+    fontSize: 14,
+    color: '#645270',
+  },
+  
+  // Стилі для модалу коду
+  codeModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingHorizontal: 20,
+  },
+  codeModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 30,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  codeModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#01578F',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  codeModalLabel: {
+    fontSize: 12,
+    color: '#666',
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  codeModalInput: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    width: '100%',
+    fontSize: 14,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  codeModalCreateButton: {
+    backgroundColor: '#77E278',
+    borderRadius: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  codeModalCreateButtonText: {
+    color: '#01578F',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  codeModalInviteLabel: {
+    fontSize: 12,
+    color: '#666',
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  codeModalInviteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 20,
+    gap: 10,
+  },
+  codeModalInviteCodeContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    alignItems: 'center',
+  },
+  codeModalInviteDisplay: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#01578F',
+    letterSpacing: 2,
+  },
+  codeModalCopyButton: {
+    backgroundColor: '#FFE380',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+  },
+  codeModalCopyText: {
+    color: '#01578F',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  codeModalOkLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 8,
+  },
+  codeModalOkButton: {
+    backgroundColor: '#D4FC79',
+    borderRadius: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    marginBottom: 15,
+  },
+  codeModalOkText: {
+    color: '#01578F',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  codeModalFooter: {
+    fontSize: 14,
+    color: '#645270',
+  },
 });
 
 export default RegisterScreen;
