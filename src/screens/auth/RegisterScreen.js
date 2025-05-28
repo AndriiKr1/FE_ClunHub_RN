@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import * as Clipboard from 'expo-clipboard';
 import { registerUser } from "../../store/slices/authSlice";
 import GradientBackground, {
   gradientPresets,
@@ -141,9 +142,17 @@ const RegisterScreen = ({ navigation }) => {
     setShowFamilyRoles(false);
 
     if (roleId === "admin") {
-      setShowGeneratedCodeModal(true);
+      // Очищаємо поля і показуємо модальне вікно створення сім'ї
+      setFamilyName("");
+      setGeneratedInviteCode("");
+      // Затримка для правильного закриття попереднього модального вікна
+      setTimeout(() => {
+        setShowGeneratedCodeModal(true);
+      }, 300);
     } else if (roleId === "user") {
-      setShowInviteCodeModal(true);
+      setTimeout(() => {
+        setShowInviteCodeModal(true);
+      }, 300);
     }
   };
 
@@ -164,6 +173,15 @@ const RegisterScreen = ({ navigation }) => {
     
     const code = generateInviteCode();
     setGeneratedInviteCode(code);
+  };
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await Clipboard.setString(generatedInviteCode);
+      Alert.alert('Copied!', `Code ${generatedInviteCode} copied to clipboard`);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to copy code to clipboard');
+    }
   };
 
   const handleInviteCodeSubmit = () => {
@@ -423,13 +441,25 @@ const RegisterScreen = ({ navigation }) => {
                   
                   {showFamilyRoles && (
                     <View style={styles.userRolesList}>
-                      {['Father', 'Mother', 'Daughter', 'Son', 'Grandma', 'Grandpa'].map((role, index) => (
+                      {[
+                        { name: 'Father', color: '#5DADE2' },
+                        { name: 'Mother', color: '#F1948A' },
+                        { name: 'Daughter', color: '#F5B7B1' },
+                        { name: 'Son', color: '#85C1E2' },
+                        { name: 'Grandma', color: '#D7BDE2' },
+                        { name: 'Grandpa', color: '#A9CCE3' }
+                      ].map((role, index) => (
                         <TouchableOpacity 
                           key={index} 
-                          onPress={() => handleRoleSelect('user')}
-                          style={styles.userRoleItem}
+                          onPress={() => {
+                            setFieldValue("role", "user");
+                            setFieldValue("subRole", role.name);
+                            setShowRoleModal(false);
+                            setShowInviteCodeModal(true);
+                          }}
+                          style={[styles.userRoleItem, { backgroundColor: role.color }]}
                         >
-                          <Text style={styles.userRoleText}>{role}</Text>
+                          <Text style={styles.userRoleText}>{role.name}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -443,7 +473,6 @@ const RegisterScreen = ({ navigation }) => {
               >
                 <Text style={styles.roleModalCancelText}>Cancel</Text>
               </TouchableOpacity>
-      
             </View>
           </View>
         </RNModal>
@@ -453,7 +482,11 @@ const RegisterScreen = ({ navigation }) => {
           visible={showGeneratedCodeModal}
           transparent={true}
           animationType="fade"
-          onRequestClose={() => setShowGeneratedCodeModal(false)}
+          onRequestClose={() => {
+            setShowGeneratedCodeModal(false);
+            setFamilyName("");
+            setGeneratedInviteCode("");
+          }}
         >
           <View style={styles.codeModalOverlay}>
             <View style={styles.codeModalContent}>
@@ -462,19 +495,22 @@ const RegisterScreen = ({ navigation }) => {
               <Text style={styles.codeModalLabel}>family name</Text>
               <TextInput
                 style={styles.codeModalInput}
-                placeholder="Create Family Name"
+                placeholder="Enter Family Name"
                 value={familyName}
                 onChangeText={setFamilyName}
+                autoFocus={true}
               />
               
-              <TouchableOpacity 
-                style={styles.codeModalCreateButton}
-                onPress={handleCreateInviteCode}
-              >
-                <Text style={styles.codeModalCreateButtonText}>Create invite code</Text>
-              </TouchableOpacity>
+              {!generatedInviteCode && (
+                <TouchableOpacity 
+                  style={styles.codeModalCreateButton}
+                  onPress={handleCreateInviteCode}
+                >
+                  <Text style={styles.codeModalCreateButtonText}>Create invite code</Text>
+                </TouchableOpacity>
+              )}
               
-              {generatedInviteCode ? (
+              {generatedInviteCode && (
                 <>
                   <Text style={styles.codeModalInviteLabel}>invite code</Text>
                   <View style={styles.codeModalInviteRow}>
@@ -483,7 +519,7 @@ const RegisterScreen = ({ navigation }) => {
                     </View>
                     <TouchableOpacity 
                       style={styles.codeModalCopyButton}
-                      onPress={() => Alert.alert('Copied!', `Code ${generatedInviteCode} copied to clipboard`)}
+                      onPress={handleCopyToClipboard}
                     >
                       <Text style={styles.codeModalCopyText}>Copy</Text>
                     </TouchableOpacity>
@@ -491,13 +527,16 @@ const RegisterScreen = ({ navigation }) => {
                   
                   <TouchableOpacity 
                     style={styles.codeModalOkButton}
-                    onPress={() => setShowGeneratedCodeModal(false)}
+                    onPress={() => {
+                      setShowGeneratedCodeModal(false);
+                      setFamilyName("");
+                      setGeneratedInviteCode("");
+                    }}
                   >
                     <Text style={styles.codeModalOkText}>OK</Text>
                   </TouchableOpacity>
                 </>
-              ) : null}
-          
+              )}
             </View>
           </View>
         </RNModal>
@@ -578,7 +617,17 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     justifyContent: "center",
     paddingHorizontal: spacing.md,
-    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
     marginBottom: spacing.md,
   },
   avatarSelectorContent: {
@@ -614,7 +663,17 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     justifyContent: "center",
     paddingHorizontal: spacing.md,
-    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
     marginBottom: spacing.md,
   },
   roleSelectorContent: {
@@ -709,7 +768,17 @@ const styles = StyleSheet.create({
   },
   selectedAvatarContainer: {
     borderColor: colors.text.primary,
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)",
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   avatarImage: {
     width: "100%",
@@ -757,8 +826,17 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 400,
     alignItems: 'center',
-    boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.3)",
-    elevation: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
   },
   roleModalTitle: {
     fontSize: 20,
@@ -779,8 +857,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
-    boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)",
-    elevation: 3,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   userButtonContainer: {
     width: '100%',
@@ -792,8 +879,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-    elevation: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   userButtonExpanded: {
     borderBottomLeftRadius: 0,
@@ -831,8 +927,17 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 25,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-    elevation: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
     marginTop: -2,
   },
   userRoleItem: {
@@ -875,8 +980,17 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 400,
     alignItems: 'center',
-    boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.3)",
-    elevation: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
   },
   codeModalTitle: {
     fontSize: 20,
@@ -955,12 +1069,39 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+  codeModalReadOnlyField: {
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    width: '100%',
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  codeModalReadOnlyText: {
+    fontSize: 14,
+    color: '#01578F',
+  },
   codeModalOkButton: {
     backgroundColor: '#D4FC79',
-    borderRadius: 15,
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    marginBottom: 15,
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    marginTop: 10,
+    alignSelf: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   codeModalOkText: {
     color: '#01578F',
